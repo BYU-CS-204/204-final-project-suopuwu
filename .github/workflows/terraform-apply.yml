@@ -1,0 +1,55 @@
+# name: "Terraform Apply"
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# env:
+#   # TODO: Replace the placeholder strings with your information
+#   TF_CLOUD_ORGANIZATION: "YOUR_TF_CLOUD_ORGANIZATION_HERE"
+#   TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
+#   TF_WORKSPACE: "YOUR_TF_CLOUD_WORKSPACE_NAME_HERE"
+#   CONFIG_DIRECTORY: "./"
+
+# jobs:
+#   terraform:
+#     name: "Terraform Apply"
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: read
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v3
+
+#       - name: Set up JDK 17
+#         uses: actions/setup-java@v3
+#         with:
+#           java-version: '17'
+#           distribution: 'adopt'
+#           architecture: x64
+
+#       - name: Build Jar File
+#         run: mvn install
+
+#       - name: Upload Configuration
+#         uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
+#         id: apply-upload
+#         with:
+#           workspace: ${{ env.TF_WORKSPACE }}
+#           directory: ${{ env.CONFIG_DIRECTORY }}
+
+#       - name: Create Apply Run
+#         uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
+#         id: apply-run
+#         with:
+#           workspace: ${{ env.TF_WORKSPACE }}
+#           configuration_version: ${{ steps.apply-upload.outputs.configuration_version_id }}
+
+#       - name: Apply
+#         uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.0.0
+#         if: fromJSON(steps.apply-run.outputs.payload).data.attributes.actions.IsConfirmable
+#         id: apply
+#         with:
+#           run: ${{ steps.apply-run.outputs.run_id }}
+#           comment: "Apply Run from GitHub Actions CI ${{ github.sha }}"
