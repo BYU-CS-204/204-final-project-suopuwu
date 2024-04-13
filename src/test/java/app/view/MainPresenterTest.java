@@ -16,34 +16,80 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MainPresenterTest {
-
-    /*TODO: Write tests to assure that the Presenter and View classes interact as expected.  If the services throw an error,
-    *  the view.displayErrorMessage() function should be called inside the presenter class.  You will need to use
-    *  mock objects to effectively test the presenter.
-    */
-    private MainPresenter classUnderTest;
+    private MainPresenter presenter;
 
     @BeforeEach
     void setUp(){
         I_MainView view = Mockito.mock(I_MainView.class);
         Service service = Mockito.mock(Service.class);
+        Response exampleResponse = new Response(new Book[]{new Book("title", "author", new String[]{"topic1", "topic2"})});
 
         try {
-            Mockito.when(service.run(new Request("Exception"))).thenThrow(IOException.class);
+            Mockito.when(service.run(new Request("exception"))).thenThrow(IOException.class);
+            Mockito.when(service.run(new Request("valid"))).thenReturn(exampleResponse);
         } catch (IOException ignored) {
 
         }
 
-        classUnderTest = new MainPresenter(view, service, service, service);
+        presenter = new MainPresenter(view, service, service, service);
 
     }
 
     @Test
-    void shouldPrintErrorMessage_whenReceiveInvalidResponse() throws IOException {
-        classUnderTest.titleSearch("Exception");
-        Mockito.verify(classUnderTest.getTitleService(), Mockito.times(1)).run(Mockito.any());
+    void titleSearchShowsResults_whenValidSearch() throws IOException {
+        String input = "valid";
 
-        Mockito.verify(classUnderTest.getView(), Mockito.times(1)).displayErrorMessage(Mockito.anyString());
+        presenter.titleSearch(input);
+        Mockito.verify(presenter.getTitleService(), Mockito.times(1)).run(new Request(input));
+        Mockito.verify(presenter.getView(), Mockito.times(1)).displayTitleSearchResults(Mockito.any());
+
+    }
+
+    @Test
+    void titleSearchPrintsError_whenServiceFails() throws IOException {
+        String input = "exception";
+
+        presenter.titleSearch(input);
+        Mockito.verify(presenter.getTitleService(), Mockito.times(1)).run(new Request(input));
+        Mockito.verify(presenter.getView(), Mockito.times(1)).displayErrorMessage(Mockito.anyString());
+    }
+
+    @Test
+    void authorSearchShowsResults_whenValidSearch() throws IOException {
+        String input = "valid";
+
+        presenter.authorSearch(input);
+        Mockito.verify(presenter.getTitleService(), Mockito.times(1)).run(new Request(input));
+        Mockito.verify(presenter.getView(), Mockito.times(1)).displayAuthorSearchResults(Mockito.any());
+
+    }
+
+    @Test
+    void authorSearchPrintsError_whenServiceFails() throws IOException {
+        String input = "exception";
+
+        presenter.authorSearch(input);
+        Mockito.verify(presenter.getAuthorService(), Mockito.times(1)).run(new Request(input));
+        Mockito.verify(presenter.getView(), Mockito.times(1)).displayErrorMessage(Mockito.anyString());
+    }
+
+    @Test
+    void topicSearchShowsResults_whenValidSearch() throws IOException {
+        String input = "valid";
+
+        presenter.topicSearch(input);
+        Mockito.verify(presenter.getTopicService(), Mockito.times(1)).run(new Request(input));
+        Mockito.verify(presenter.getView(), Mockito.times(1)).displayTopicSearchResults(Mockito.any());
+
+    }
+
+    @Test
+    void topicSearchPrintsError_whenServiceFails() throws IOException {
+        String input = "exception";
+
+        presenter.topicSearch(input);
+        Mockito.verify(presenter.getTitleService(), Mockito.times(1)).run(new Request(input));
+        Mockito.verify(presenter.getView(), Mockito.times(1)).displayErrorMessage(Mockito.anyString());
     }
 
 
